@@ -18,36 +18,36 @@ static void sleep_tick(uint32_t duration){
 static void thread1(){
 
     int count = 5;
-    print("Thread 1 starts!");
+    print("Running thread <1>");
        while(count-- > 0){
          _disable_interrupt();
-        print("(1)");
+        print("<1>");
         sleep_tick(SLEEP_DUR);
        _enable_interrupt();
     }
-    print("Thread 1 is finished!");
+    print("Done <1>");
 }
 static void thread2(){
     int count = 8;
-    print("Thread 2 starts!");
+    print("Running thread <2>");
       while(count-- > 0){
          _disable_interrupt(); 
-        print("(2)");
+        print("<2>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Thread 2 is finished!");
+    print("Done <2>");
 }
 static void thread3(){
     int count = 11;  
-    print("Thread 3 starts!");
+    print("Running thread <3>");
     while(count-- > 0){
         _disable_interrupt();
-        print("(3)");
+        print("<3>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Thread 3 is finished!");
+    print("Done <3>");
 }
 
 void init_threads(void){
