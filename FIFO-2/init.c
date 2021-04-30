@@ -19,24 +19,30 @@ static void thread1(){
 
     int count = 5;
        while(count-- >0){
+         _disable_interrupt();
         print("[1]");
         sleep_tick(SLEEP_DUR);
+       _enable_interrupt();
     }
     print("Thread 1 is finished!");
 }
 static void thread2(){
     int count = 6;
       while(count-- >0){
+         _disable_interrupt();
         print("[2]");
         sleep_tick(SLEEP_DUR);
+        _enable_interrupt();
     }
     print("Thread 2 is finished!");
 }
 static void thread3(){
     int count = 7;  
     while(count-- >0){
+        _disable_interrupt();
         print("[3]");
         sleep_tick(SLEEP_DUR);
+        _enable_interrupt();
     }
     print("Thread 3 is finished!");
 }
@@ -53,8 +59,7 @@ void init_threads(void){
 
 void init( multiboot* pmb ) {
 
-   _disable_interrupt();
-
+    _disable_interrupt();
    memory_map_t *mmap;
    unsigned int memsz = 0;		/* Memory size in MB */
    static char memstr[10];
@@ -91,12 +96,11 @@ void init( multiboot* pmb ) {
   init_tcb();
   init_threads();
 
-  init_idt();
   init_pic();
   init_pit();
 
+  //schedule();
   _enable_interrupt();
-
   while(1);
 
 }

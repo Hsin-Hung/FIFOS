@@ -1,8 +1,10 @@
     .globl stack
+    .globl idt
 
     .bss
    # .align 0x1000
     .comm stack, 0x1000 # set up 4KB stack area in bss
+    .comm idt, 0x800
 
     .data
     .align 0x4
@@ -27,6 +29,10 @@ gdt:
 gdt_ptr:
     .short 0x7FF /* length in bytes - 3 descriptors but space for 256 */
     .long gdt   /* linear address */
+
+idt_ptr:
+    .short 0x7FF /* length in bytes - 3 descriptors but space for 256 */
+    .long idt   /* linear address */   
 
     .text
     .globl _start
@@ -62,6 +68,24 @@ real_start:
     movl $stack+0x1000, %esp # set up 4Kbyte stack
 
 	pushl %ebx # save multiboot parameter, for eventual call to C code
+
+    movl $idt, %edi
+    movl $0x30, %ecx
+    movl $0x080000, %edx
+    movl $int_table, %esi
+
+1:
+    lodsl
+    movw %ax, %dx
+
+    movw $0x8E00, %ax
+    movl %edx, (%edi)
+    addl $4, %edi
+    stosl
+
+    loop 1b
+
+    lidt idt_ptr 
 
     call init # start of C code 
 

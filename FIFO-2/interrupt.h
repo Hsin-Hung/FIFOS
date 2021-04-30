@@ -69,60 +69,17 @@ static inline void lidt(void* base, uint16_t size)
     __asm__ ( "lidt %0" : : "m"(IDTR) );  // let the compiler choose an addressing mode
 }
 
-static inline unsigned long save_irqdisable(void)
-{
-    unsigned long flags;
-    __asm__ volatile ("pushf\n\tcli\n\tpop %0" : "=r"(flags) : : "memory");
-    return flags;
-}
- 
-static inline void irqrestore(unsigned long flags)
-{
-    __asm__ ("push %0\n\tpopf" : : "rm"(flags) : "memory","cc");
-}
-
-
-// static inline void outb( unsigned char uch, unsigned short usPort ) {
-
-//     __asm__ volatile( "outb %0,%1" : : "a" (uch), "Nd" (usPort) );
-
-// }
-
 void unhandled_interrupt(void){
+    outb(0x20,0x20);
     print("unhandler interrupt");
-    return;
 }
 
 void timer_irq(void){
 
-    outb(PIC1_COMMAND, PIC_EOI);
-    print("timer interrupt");
-    //schedule();
-}
+    outb(0x20,0x20);
+    print("ti");
+    schedule();
 
-void init_idt(void){
-
-    for(uint32_t i=0; i<NUM_IDT_ENTRIES-1; i++){
-
-        idt[i].selector = 0x08;
-        idt[i].type_attr = 0x8e;
-        idt[i].zero = 0;      
-        idt[i].offset_1 = (uint16_t) (((uint32_t) unhandled_interrupt) & 0xffff);
-        idt[i].offset_2 = (uint16_t) ((((uint32_t) unhandled_interrupt) & (0xffff0000)) >> 16);
-
-    }
-
-    idt[NUM_IDT_ENTRIES-1].selector = 0x08;
-    idt[NUM_IDT_ENTRIES-1].type_attr = 0x8e;
-    idt[NUM_IDT_ENTRIES-1].zero = 0;      
-    idt[NUM_IDT_ENTRIES-1].offset_1 = (uint16_t) (((uint32_t) timer_irq) & (0xffff));
-    idt[NUM_IDT_ENTRIES-1].offset_2 = (uint16_t) ((((uint32_t) timer_irq) & (0xffff0000)) >> 16);
-
-    uint16_t size = 0x7ff;
-    uint32_t idt_address = (uint32_t) idt;
-    uint64_t idt_ptr = (uint64_t) idt_address << 16 | size;
-
-    lidt((void*) idt_address, size);
 }
 
 void init_pic(void){
