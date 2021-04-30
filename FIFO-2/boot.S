@@ -69,19 +69,22 @@ real_start:
 
 	pushl %ebx # save multiboot parameter, for eventual call to C code
 
+    /* Set up IDT by constructing 64-bit interrupt descriptors */
     movl $idt, %edi
-    movl $0x30, %ecx
-    movl $0x080000, %edx
-    movl $int_table, %esi
+    movl $0x21, %ecx /* Set counter for 33 IDT entries used */
+    movl $0x080000, %edx /* Used to index KERNEL CS */
+    movl $int_table, %esi 
 
+    /* Populate int_table interrupt gate descriptors */
 1:
-    lodsl
-    movw %ax, %dx
+    lodsl /* value at address DS:ESI --> EAX, then increment ESI by 4 */
+    movw %ax, %dx /* lower 16-bits of int_table address */
 
-    movw $0x8E00, %ax
-    movl %edx, (%edi)
+    movw $0x8E00, %ax /* DPL = ring 0 */
+    movl %edx, (%edi) /* store bottom 32-bit of descriptors in EDX into IDT */
     addl $4, %edi
-    stosl
+    stosl /* Store top 32-bits of descriptors held in EAX into IDT 
+            EAX --> address ES:DI, then increment EDI by 4 */
 
     loop 1b
 
@@ -89,9 +92,7 @@ real_start:
 
     call init # start of C code 
 
+finish:
+
     cli
     hlt
-
-finish:
-    jmp finish
-    

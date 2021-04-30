@@ -18,29 +18,32 @@ static void sleep_tick(uint32_t duration){
 static void thread1(){
 
     int count = 5;
-       while(count-- >0){
+    print("Thread 1 starts!");
+       while(count-- > 0){
          _disable_interrupt();
-        print("[1]");
+        print("(1)");
         sleep_tick(SLEEP_DUR);
        _enable_interrupt();
     }
     print("Thread 1 is finished!");
 }
 static void thread2(){
-    int count = 6;
-      while(count-- >0){
-         _disable_interrupt();
-        print("[2]");
+    int count = 8;
+    print("Thread 2 starts!");
+      while(count-- > 0){
+         _disable_interrupt(); 
+        print("(2)");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
     print("Thread 2 is finished!");
 }
 static void thread3(){
-    int count = 7;  
-    while(count-- >0){
+    int count = 11;  
+    print("Thread 3 starts!");
+    while(count-- > 0){
         _disable_interrupt();
-        print("[3]");
+        print("(3)");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
@@ -55,11 +58,9 @@ void init_threads(void){
 
 }
 
-
-
 void init( multiboot* pmb ) {
 
-    _disable_interrupt();
+    _disable_interrupt(); /* diable interrupt here for setting up PIC */
    memory_map_t *mmap;
    unsigned int memsz = 0;		/* Memory size in MB */
    static char memstr[10];
@@ -99,9 +100,8 @@ void init( multiboot* pmb ) {
   init_pic();
   init_pit();
 
-  //schedule();
+  schedule();
   _enable_interrupt();
-  while(1);
 
 }
 

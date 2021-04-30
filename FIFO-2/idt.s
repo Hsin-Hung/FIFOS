@@ -1,55 +1,56 @@
 .globl int_table
-.globl timer 
-.globl unhandled
+.globl timer_irq 
+.globl unhandled_irq
 
 int_table:
-    .long unhandled /* 0 */
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled
-    .long unhandled
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled       
-    .long unhandled
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled
-    .long unhandled
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled 
-    .long unhandled
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled
-    .long unhandled
-    .long unhandled   
-    .long unhandled  
-    .long unhandled   
-    .long unhandled        
-    .long unhandled   
-    .long unhandled /* 31 */
+    /* first 32 reserved CPU exceptions */
+    .long unhandled_irq /* 0 */
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq       
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq  
+    .long unhandled_irq   
+    .long unhandled_irq /* 31 */
 
-    .long timer 
+    .long timer_irq 
 
 .section .text
 
-timer:
+timer_irq:
     pushal
-    cld
-    call timer_irq
+    cld /* C code following the sysV ABI requires DF to be clear on function entry */
+    call timer_irq_handler
     popal
     iret
 
-unhandled:
+unhandled_irq:
     pushal
-    cld
-    call unhandled_interrupt
+    cld /* C code following the sysV ABI requires DF to be clear on function entry */
+    call unhandled_interrupt_handler
     popal
     iret 

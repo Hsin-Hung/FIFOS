@@ -24,28 +24,18 @@
 #define PIC2_DATA	(PIC2+1)
 #define PIC_EOI	0x20
 #define PIC2_BASE_IRQ 0x28
-#define NUM_IDT_ENTRIES 33
+
 #define PIT_FREQ 1193182
 #define RELOAD_VAL 100  
+
 #define _disable_interrupt() __asm__ volatile ("cli\n\t")
 #define _enable_interrupt() __asm__ volatile ("sti\n\t")
-
-typedef struct IDTDescr {
-   uint16_t offset_1; // offset bits 0..15
-   uint16_t selector; // a code segment selector in GDT or LDT
-   uint8_t zero;      // unused, set to 0
-   uint8_t type_attr; // type and attributes, see below
-   uint16_t offset_2; // offset bits 16..31
-}IDTDescr_t;
-
-static IDTDescr_t idt[NUM_IDT_ENTRIES];
 
 extern void schedule(void);
 
 static inline unsigned char inb( unsigned short usPort ) {
 
     unsigned char uch;
-   
     __asm__ volatile( "inb %1,%0" : "=a" (uch) : "Nd" (usPort) );
     return uch;
 }
@@ -53,50 +43,43 @@ static inline unsigned char inb( unsigned short usPort ) {
 static inline void outb(uint16_t port, uint8_t val)
 {
     __asm__ volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
-    /* There's an outb %al, $imm8  encoding, for compile-time constant port numbers that fit in 8b.  (N constraint).
-     * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
-     * The  outb  %al, %dx  encoding is the only option for all other cases.
-     * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
-}
-
-static inline void lidt(void* base, uint16_t size)
-{   // This function works in 32 and 64bit mode
-    struct {
-        uint16_t length;
-        void*    base;
-    } __attribute__((packed)) IDTR = { size, base };
- 
-    __asm__ ( "lidt %0" : : "m"(IDTR) );  // let the compiler choose an addressing mode
-}
-
-void unhandled_interrupt(void){
-    outb(0x20,0x20);
-    print("unhandler interrupt");
-}
-
-void timer_irq(void){
-
-    outb(0x20,0x20);
-    print("ti");
-    schedule();
 
 }
 
+void unhandled_interrupt_handler(void){
+    outb(PIC1_COMMAND,PIC_EOI); // EOI (End of Interrupt) signal to master PIC
+}
+
+void timer_irq_handler(void){
+
+    outb(PIC1_COMMAND,PIC_EOI); // EOI (End of Interrupt) signal to master PIC
+    schedule(); // pre-empt current thread and schedule a new thread 
+    
+}
+
+/* PIC initialization source:https://wiki.osdev.org/8259_PIC */
 void init_pic(void){
 
 	unsigned char a1, a2;
-    int offset1 = 0x20, offset2 = 0x28;
+    int offset1 = 0x20; // master offset, skip over the 32 reserved CPU exeptions in IDT 
+    int offset2 = 0x28; // slave offset, not gonna be used
  
 	a1 = inb(PIC1_DATA);                        // save masks
 	a2 = inb(PIC2_DATA);
- 
-	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+    
+    // starts the initialization sequence (in cascade mode)
+	outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  
 	outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+
+    /* Its vector offset */
 	outb(PIC1_DATA, offset1);                 // ICW2: Master PIC vector offset
 	outb(PIC2_DATA, offset2);                 // ICW2: Slave PIC vector offset
+
+    /* Tell it how it is wired to master/slaves */
 	outb(PIC1_DATA, 4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
 	outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
  
+    /* Gives additional information about the environment */
 	outb(PIC1_DATA, ICW4_8086);
 	outb(PIC2_DATA, ICW4_8086);
  
@@ -105,19 +88,22 @@ void init_pic(void){
 
 }
 
+/* PIT initialization to send timer interrupt once every 10ms */
 void init_pit(void){
 
-    //00110100
+    /* 0x34(00110100) --> Mode/Command register 0x43
+        00: channel 0
+        11: lobyte/hibyte
+        010: rate generator
+        0: 16-bit binary mode
+    */
     outb(0x43, 0x34);
 
     // high:low
-    uint16_t frequency = PIT_FREQ/RELOAD_VAL;
+    uint16_t frequency = PIT_FREQ/RELOAD_VAL; 
     uint8_t upper = (uint8_t) ((frequency & 0xff00) >> 8), low = (uint8_t) (frequency & 0xff);
     outb(0x40, low);
     outb(0x40, upper);
 
 }
-
-
-
 #endif

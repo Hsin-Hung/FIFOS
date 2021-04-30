@@ -15,7 +15,7 @@ typedef struct TCB{
 }TCB_t;
 
 TCB_t fifos_threads[NUM_THREADS]; // the pool of threads
-TCB_t *runqueue = NULL; // linked list as the run queue for the allocated threads
+TCB_t *runqueue = NULL; // linked list as the run queue for the allocated threads, eg. T1 -> T2 -> T3 
 TCB_t *cur_thread = NULL; // the current running thread 
 
 // initialize the pool of TCBs 
@@ -98,6 +98,7 @@ void schedule(void){
     
     TCB_t *fromThread = cur_thread;
     cur_thread = tcb;
+ 
     if(fromThread){
         runqueue_add(fromThread);// add the preempted thread to the run queue
         __asm__ volatile("call context_switch"::"S"(fromThread), "D"(cur_thread)); //S:esi, D:edi 
@@ -105,7 +106,6 @@ void schedule(void){
         __asm__ volatile("call context_switch"::"S"(0), "D"(cur_thread));// for the first thread thread 
     }
 
-    
 
 }
 
@@ -152,17 +152,17 @@ int thread_create(void *stack, void *func){
         return -1;
     }
 
-    *(((uint32_t *) stack) - 0) = (uint32_t) exit_thread;
+    *(((uint32_t *) stack) - 0) = (uint32_t) exit_thread; /* get called at the end of the thread execution */
     stack = (void *) (((uint32_t *) stack) - 1);
 
     fifos_threads[new_tcb].tid = new_tcb;
-    fifos_threads[new_tcb].bp = (uint32_t) stack;
+    fifos_threads[new_tcb].bp = (uint32_t) stack; 
     fifos_threads[new_tcb].entry = (uint32_t) func;
-    fifos_threads[new_tcb].allocated = 1;
+    fifos_threads[new_tcb].allocated = 1; /* mark as an allocated thread */
     fifos_threads[new_tcb].next = NULL;
     fifos_threads[new_tcb].sp = (uint32_t) (((uint16_t *) stack) - 22);
 
-    /* EIP */ *(((uint32_t *) stack) - 0) = fifos_threads[new_tcb].entry;
+    /* EIP */ *(((uint32_t *) stack) - 0) = fifos_threads[new_tcb].entry; /* execute the thread function */
     /* FLG */ *(((uint32_t *) stack) - 1) = 0;
 
     /* EAX */ *(((uint32_t *) stack) - 2) = 0;
