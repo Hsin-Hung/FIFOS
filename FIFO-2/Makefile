@@ -2,13 +2,13 @@ CC = gcc
 CFLAGS = -m32 -fno-builtin -fno-stack-protector -fno-strict-aliasing -fno-delete-null-pointer-checks -nostdinc -I. -g -Wall -std=c99
 CPPFLAGS = -Wa,--32 -MMD
 OBJS = boot.o init.o switch.o idt.o 
-PROGS = memos-2
+PROGS = fifos-2
 MNT_POINT=/mnt/
 
 all: $(PROGS)
 
-memos-2: $(OBJS)
-	$(LD) -m elf_i386 -T memos.ld -o $@ $^
+fifos-2: $(OBJS)
+	$(LD) -m elf_i386 -T fifos-2.ld -o $@ $^
 
 %: %.c
 

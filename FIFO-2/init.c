@@ -18,36 +18,36 @@ static void sleep_tick(uint32_t duration){
 static void thread1(){
 
     int count = 5;
-    print("Running thread <1>");
+    print("Running thread <1>: ");
        while(count-- > 0){
          _disable_interrupt();
         print("<1>");
         sleep_tick(SLEEP_DUR);
        _enable_interrupt();
     }
-    print("Done <1>");
+    print("Done<1> ");
 }
 static void thread2(){
     int count = 8;
-    print("Running thread <2>");
+    print("Running thread <2>: ");
       while(count-- > 0){
          _disable_interrupt(); 
         print("<2>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Done <2>");
+    print("Done<2> ");
 }
 static void thread3(){
     int count = 11;  
-    print("Running thread <3>");
+    print("Running thread <3>: ");
     while(count-- > 0){
         _disable_interrupt();
         print("<3>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Done <3>");
+    print("Done<3> ");
 }
 
 void init_threads(void){
@@ -90,9 +90,12 @@ void init( multiboot* pmb ) {
 
   terminal_initialize();
 
+  println("Welcome to FIFOS - Hsin-Hung Wu");
+  println("");
   print("MemOS: Welcome *** System memory is: ");
   print(memstr);
   println("MB");
+  println("");
 
   init_tcb();
   init_threads();
