@@ -4,6 +4,7 @@
 #include "types.h"
 #include "print.h"
 
+/* definitions source: https://wiki.osdev.org/8259_PIC */
 #define ICW1_ICW4	0x01		/* ICW4 (not) needed */
 #define ICW1_SINGLE	0x02		/* Single (cascade) mode */
 #define ICW1_INTERVAL4	0x04		/* Call address interval 4 (8) */
@@ -57,7 +58,7 @@ void timer_irq_handler(void){
     
 }
 
-/* PIC initialization source:https://wiki.osdev.org/8259_PIC */
+/* PIC initialization, source:https://wiki.osdev.org/8259_PIC */
 void init_pic(void){
 
 	unsigned char a1, a2;
@@ -88,7 +89,7 @@ void init_pic(void){
 
 }
 
-/* PIT initialization to send timer interrupt once every 10ms */
+/* PIT initialization to send timer interrupt once every 10ms, source: https://wiki.osdev.org/Programmable_Interval_Timer*/
 void init_pit(void){
 
     /* 0x34(00110100) --> Mode/Command register 0x43
