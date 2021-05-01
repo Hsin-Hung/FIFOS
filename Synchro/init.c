@@ -3,6 +3,7 @@
 #include "print.h"
 #include "thread.h"
 #include "interrupt.h"
+#include "synchros.h"
 #define SLEEP_DUR 150000000
 
 static uint32_t stack1[1024];
@@ -17,58 +18,82 @@ static void sleep_tick(uint32_t duration){
 }
 
 static void thread1(){
-
-    int count = 5;
-    print("Running thread <1>: ");
-       while(count-- > 0){
-         _disable_interrupt();
-        print("<1>");
-        sleep_tick(SLEEP_DUR);
-       _enable_interrupt();
+    int msg_num = 0, success = 0;
+       while(msg_num < NUM_MSG){
+           _disable_interrupt();
+           println("<1>");
+           if(msg_num % 2 == 0){
+               success = in(1, 3, msg_num);
+           }else{
+               success = in(1, 4, msg_num);
+           }
+            if(success){
+                ++msg_num;
+            }else{
+                println("buffer full");
+            }
+            sleep_tick(SLEEP_DUR);
+           _enable_interrupt();
     }
-    print("Done<1> ");
 }
 static void thread2(){
-    int count = 8;
-    print("Running thread <2>: ");
-      while(count-- > 0){
-         _disable_interrupt(); 
-        print("<2>");
-        sleep_tick(SLEEP_DUR);
-        _enable_interrupt();
+    int msg_num = 0, success = 0;
+      while(msg_num < NUM_MSG){
+            _disable_interrupt();
+            println("<2>");
+           if(msg_num % 2 == 0){
+               success = in(2, 3, msg_num);
+           }else{
+               success = in(2, 4, msg_num);
+           }
+            if(success){
+                ++msg_num;
+            }else{
+                println("buffer full");
+            }
+           sleep_tick(SLEEP_DUR);
+           _enable_interrupt();
     }
-    print("Done<2> ");
 }
 static void thread3(){
-    int count = 11;  
-    print("Running thread <3>: ");
-    while(count-- > 0){
+    int msg_num = NUM_MSG;  
+    while(msg_num > 0){
         _disable_interrupt();
-        print("<3>");
-        sleep_tick(SLEEP_DUR);
+        println("<3>");
+        int success = out(3);
+        if(success){
+            --msg_num;
+        }else{
+            println("no item");
+        }
+         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Done<3> ");
 }
 
 static void thread4(){
-    int count = 11;  
-    print("Running thread <4>: ");
-    while(count-- > 0){
+    int msg_num = NUM_MSG;  
+    while(msg_num > 0){
         _disable_interrupt();
-        print("<4>");
+         println("<4>");
+        int success = out(4);
+        if(success){
+            --msg_num;
+        }else{
+            println("no item");
+        }
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
+
     }
-    print("Done<4> ");
 }
 
 void init_threads(void){
 
-    thread_create(&stack1[1023], thread1, 1);
-    thread_create(&stack2[1023], thread2, 1);
-    thread_create(&stack3[1023], thread3, 0);
-    thread_create(&stack4[1023], thread4, 0);
+    thread_create(&stack1[1023], thread1);
+    thread_create(&stack2[1023], thread2);
+    thread_create(&stack3[1023], thread3);
+    thread_create(&stack4[1023], thread4);
 
 }
 
@@ -104,7 +129,7 @@ void init( multiboot* pmb ) {
 
   terminal_initialize();
 
-  println("Welcome to FIFOS - Hsin-Hung Wu");
+  println("Welcome to SYNCHROS - Hsin-Hung Wu");
   println("");
   print("MemOS: Welcome *** System memory is: ");
   print(memstr);
@@ -116,6 +141,7 @@ void init( multiboot* pmb ) {
 
   init_pic();
   init_pit();
+  init_buffers();
 
   schedule();
   _enable_interrupt();

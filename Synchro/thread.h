@@ -1,6 +1,6 @@
 #include "types.h"
 
-#define NUM_THREADS 3 
+#define NUM_THREADS 4 
 #define NULL 0
 
 typedef struct TCB{
@@ -10,7 +10,6 @@ typedef struct TCB{
     uint32_t *bp;
     uint32_t (*entry)();
     uint32_t allocated;
-    uint32_t isProducer;
     struct TCB *next;
 
 }TCB_t;
@@ -142,7 +141,7 @@ int get_tcb(){
 
 }
 
-int thread_create(void *stack, void *func, uint32_t isProducer){
+int thread_create(void *stack, void *func){
 
     int new_tcb = -1; 
     uint16_t ds = 0x10, es = 0x10, fs = 0x10, gs = 0x10;
@@ -160,7 +159,6 @@ int thread_create(void *stack, void *func, uint32_t isProducer){
     fifos_threads[new_tcb].bp = (uint32_t) stack; 
     fifos_threads[new_tcb].entry = (uint32_t) func;
     fifos_threads[new_tcb].allocated = 1; /* mark as an allocated thread */
-    fifos_threads[new_tcb].isProducer = isProducer;
     fifos_threads[new_tcb].next = NULL;
     fifos_threads[new_tcb].sp = (uint32_t) (((uint16_t *) stack) - 22);
 
