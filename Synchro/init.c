@@ -18,10 +18,12 @@ static void sleep_tick(uint32_t duration){
 }
 
 static void thread1(){
+
     int msg_num = 0, success = 0;
+
        while(msg_num < NUM_MSG){
            _disable_interrupt();
-           println("<1>");
+           print("<Producer 1>");
            if(msg_num % 2 == 0){
                success = in(1, 3, msg_num);
            }else{
@@ -40,7 +42,7 @@ static void thread2(){
     int msg_num = 0, success = 0;
       while(msg_num < NUM_MSG){
             _disable_interrupt();
-            println("<2>");
+            print("<Producer 2>");
            if(msg_num % 2 == 0){
                success = in(2, 3, msg_num);
            }else{
@@ -59,7 +61,7 @@ static void thread3(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-        println("<3>");
+        print("<3>");
         int success = out(3);
         if(success){
             --msg_num;
@@ -75,7 +77,7 @@ static void thread4(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-         println("<4>");
+         print("<4>");
         int success = out(4);
         if(success){
             --msg_num;
