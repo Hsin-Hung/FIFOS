@@ -2,8 +2,8 @@
 #define _SYNCHRO_H_
 #include "types.h"
 
-#define S 5 
-#define NUM_MSG 10 /* make sure this is even number for equal prod-con distribution, or else it gets stuck in infinite loop */
+#define S 16 
+#define NUM_MSG 100 /* make sure this is even number for equal prod-con distribution, or else it gets stuck in infinite loop */
 
 void printConsumerMsg(uint32_t pid, uint32_t cid, uint32_t mnum, char * msg);
 void createMsg(uint32_t msg_num, uint32_t toThreadID, char buf[]);
@@ -21,7 +21,7 @@ typedef struct BUFFER {
 static BUFFER_t circular_buf[S]; /* Shared Circular Buffer */
 uint32_t in_i = 0; /* in index for producer */
 uint32_t out_i = 0; /* out index for consumer */
-uint32_t counter = 0;
+uint32_t counter = 0; /* the number of full buffer slots*/
 
 /* initialize the shared circular buffer */
 void init_buffers(void){
@@ -41,8 +41,10 @@ void init_buffers(void){
 
 }
 
+/* for the producer thread to put item into the shared buffer */
 int in(uint32_t prod_tid, uint32_t con_tid, uint32_t msg_num){
 
+    /* if the buffer is full, then nothing else to do */
     if(counter == S){
         println("<Buffer Full>");
         return 0;
@@ -61,13 +63,16 @@ int in(uint32_t prod_tid, uint32_t con_tid, uint32_t msg_num){
         return 1;
     }
 
+    /* shouldn't have gotten here */
     println("<Buffer Error>");
     return 0; 
 
 }
 
+/* for the consumer thread to take item out of the shared buffer */
 int out(uint32_t tid){
 
+    /* if the buffer is empty, then nothing else to do */
     if(counter == 0){
         println("<Buffer Empty>");
         return 0;
@@ -94,6 +99,7 @@ int out(uint32_t tid){
 
 }
 
+/* print the msg that the consumer thread retrieved */
 void printConsumerMsg(uint32_t cid, uint32_t pid, uint32_t mnum, char * msg){
 
     static char cidstr[2], pidstr[2], mnumstr[2];
@@ -114,6 +120,7 @@ void printConsumerMsg(uint32_t cid, uint32_t pid, uint32_t mnum, char * msg){
 
 }
 
+/* create the producer msg */
 void createMsg(uint32_t msg_num, uint32_t toThreadID, char buf[]){
 
     static char msg[20];
@@ -131,6 +138,7 @@ void createMsg(uint32_t msg_num, uint32_t toThreadID, char buf[]){
 
 }
 
+/* concat s1 with s2 */
 void concat(char s1[], char s2[]) {
   int length, j;
 
