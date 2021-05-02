@@ -90,7 +90,6 @@ void schedule(void){
           return;
         }
       }
-
       print("No more threads!");
       __asm__ volatile("jmp finish");
       return;

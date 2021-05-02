@@ -2,7 +2,7 @@
 #include "types.h"
 #include "print.h"
 #include "thread.h"
-#define SLEEP_DUR 150000000
+#define SLEEP_DUR 300000000
 
 static uint32_t stack1[1024];
 static uint32_t stack2[1024];
@@ -15,32 +15,34 @@ static void sleep_tick(uint32_t duration){
 }
 
 static void thread1(){
-
-    int count = 1;
+    print("<Start 1>");
+    int count = 5;
        while(count-- >0){
-        print("[1]");
+        print("<1>");
         sleep_tick(SLEEP_DUR);
         thread_yield();
     }
-    print("Thread 1 is finished!");
+    print("<End 1>");
 }
 static void thread2(){
-    int count = 2;
+    print("<Start 2>");
+    int count = 8;
       while(count-- >0){
-        print("[2]");
+        print("<2>");
         sleep_tick(SLEEP_DUR);
         thread_yield();
     }
-    print("Thread 2 is finished!");
+    print("<End 2>");
 }
 static void thread3(){
-    int count = 3;  
+    print("<Start 3>");
+    int count = 11;  
     while(count-- >0){
-        print("[3]");
+        print("<3>");
         sleep_tick(SLEEP_DUR);
         thread_yield();
     }
-    print("Thread 3 is finished!");
+    print("<End 3>");
 }
 
 void init_threads(void){
@@ -84,12 +86,19 @@ void init( multiboot* pmb ) {
 
   terminal_initialize();
 
+  println("Welcome to FIFOS - Hsin-Hung Wu");
+  println("");
   print("MemOS: Welcome *** System memory is: ");
   print(memstr);
   println("MB");
+  println("");
 
   init_tcb();
   init_threads();
+
+  println("Begin Scheduling ...");
+  println("");
+  sleep_tick(SLEEP_DUR);
   schedule();
 
 }
