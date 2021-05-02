@@ -29,14 +29,12 @@ static void thread1(){
            }else{
                success = in(1, 4, msg_num);
            }
-            if(success){
-                ++msg_num;
-            }else{
-                println("buffer full");
-            }
+            if(success)++msg_num;
+            
             sleep_tick(SLEEP_DUR);
            _enable_interrupt();
     }
+    println("<Done 1>");
 }
 static void thread2(){
     int msg_num = 0, success = 0;
@@ -48,54 +46,43 @@ static void thread2(){
            }else{
                success = in(2, 4, msg_num);
            }
-            if(success){
-                ++msg_num;
-            }else{
-                println("buffer full");
-            }
+            if(success)++msg_num;
+            
            sleep_tick(SLEEP_DUR);
            _enable_interrupt();
     }
+    println("<Done 2>");
 }
 static void thread3(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-        print("<3>");
-        int success = out(3);
-        if(success){
-            --msg_num;
-        }else{
-            println("no item");
-        }
+        print("<Consumer 3>");
+        if(out(3))--msg_num;
          sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
+    println("<Done 3>");
 }
 
 static void thread4(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-         print("<4>");
-        int success = out(4);
-        if(success){
-            --msg_num;
-        }else{
-            println("no item");
-        }
+         print("<Consumer 4>");
+        if(out(4))--msg_num;
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
-
     }
+    println("<Done 4>");
 }
 
 void init_threads(void){
 
-    thread_create(&stack1[1023], thread1);
-    thread_create(&stack2[1023], thread2);
-    thread_create(&stack3[1023], thread3);
-    thread_create(&stack4[1023], thread4);
+    thread_create(&stack1[1023], thread1, 1);
+    thread_create(&stack2[1023], thread2, 1);
+    thread_create(&stack3[1023], thread3, 0);
+    thread_create(&stack4[1023], thread4, 0);
 
 }
 
@@ -144,6 +131,9 @@ void init( multiboot* pmb ) {
   init_pic();
   init_pit();
   init_buffers();
+
+  println("Begin Producing and Consuming ...");
+  println("");
 
   schedule();
   _enable_interrupt();

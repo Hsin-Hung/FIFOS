@@ -1,7 +1,8 @@
 #include "types.h"
-
+#include "synchros.h"
 #define NUM_THREADS 4 
 #define NULL 0
+#define OPTIMIZE 0
 
 typedef struct TCB{
 
@@ -10,6 +11,7 @@ typedef struct TCB{
     uint32_t *bp;
     uint32_t (*entry)();
     uint32_t allocated;
+    uint32_t isProducer;
     struct TCB *next;
 
 }TCB_t;
@@ -29,21 +31,6 @@ void init_tcb(void){
 
 }
 
-// pick the next thread from the run queue 
-static TCB_t* pick_next_thread(void){
-
-  TCB_t *tcb = runqueue;
-
-  if (tcb){
-
-    runqueue = tcb->next;
-
-  }
-
-  return tcb;
-
-}
-
 // hlt when there is any error 
 void error(char *s){
 
@@ -56,8 +43,9 @@ void error(char *s){
 // add a thread back to the run queue 
 void runqueue_add(TCB_t *tcb){
 
-    // don't add the thread to the run queue if it's not allocated 
+    // no unallocated TCB should be added to the run queue 
     if(!tcb->allocated){
+      error("schedule an unallocated TCB");
       return;
     }
 
@@ -76,6 +64,41 @@ void runqueue_add(TCB_t *tcb){
 
 }
 
+// pick the next thread from the run queue 
+static TCB_t* pick_next_thread(void){
+
+  if(!runqueue)return runqueue;
+
+  TCB_t *tcb;
+  int i = NUM_THREADS;
+
+  if(!OPTIMIZE){
+    tcb = runqueue;
+    if (tcb){
+        runqueue = tcb->next;
+    }
+    return tcb;
+  }
+
+
+  while(--i >= 0){
+    tcb = runqueue;
+    if (tcb){
+      runqueue = tcb->next;
+    }
+
+    if((counter == S && tcb->isProducer) || (counter == 0 && !tcb->isProducer)){
+        runqueue_add(tcb);
+    }else{
+      break;
+    }
+
+  }
+
+  return tcb;
+
+}
+
 // schedule the next thread to run 
 void schedule(void){
     
@@ -84,12 +107,8 @@ void schedule(void){
     // if there is no more threads in the run queue
     if(!tcb){
 
-      //this is simply for finish running the current thread 
-      for(uint32_t i=0; i<NUM_THREADS; i++){
-        if (fifos_threads[i].allocated){
-          return;
-        }
-      }
+      //we still have to finish executing the current thread 
+     if(cur_thread)return;
 
       print("No more threads!");
       __asm__ volatile("jmp finish");
@@ -103,21 +122,21 @@ void schedule(void){
         runqueue_add(fromThread);// add the preempted thread to the run queue
         __asm__ volatile("call context_switch"::"S"(fromThread), "D"(cur_thread)); //S:esi, D:edi 
     }else{
-        __asm__ volatile("call context_switch"::"S"(0), "D"(cur_thread));// for the first thread thread 
+        __asm__ volatile("call context_switch"::"S"(0), "D"(cur_thread));// for the first thread 
     }
 
 
 }
 
-// exit thread logic when a thread finishes executing 
+// exit thread logic when current thread finishes executing 
 void exit_thread(void){
   if(cur_thread == NULL){
     error("Exit without current thread!");
     return;
   }
-  //runqueue_remove(cur_thread);
   cur_thread->allocated = 0;
   cur_thread->tid = -1;
+  cur_thread = NULL;
   schedule(); 
 }
 
@@ -141,7 +160,7 @@ int get_tcb(){
 
 }
 
-int thread_create(void *stack, void *func){
+int thread_create(void *stack, void *func, uint32_t isProducer){
 
     int new_tcb = -1; 
     uint16_t ds = 0x10, es = 0x10, fs = 0x10, gs = 0x10;
@@ -159,6 +178,7 @@ int thread_create(void *stack, void *func){
     fifos_threads[new_tcb].bp = (uint32_t) stack; 
     fifos_threads[new_tcb].entry = (uint32_t) func;
     fifos_threads[new_tcb].allocated = 1; /* mark as an allocated thread */
+    fifos_threads[new_tcb].isProducer = isProducer;
     fifos_threads[new_tcb].next = NULL;
     fifos_threads[new_tcb].sp = (uint32_t) (((uint16_t *) stack) - 22);
 

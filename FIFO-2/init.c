@@ -3,7 +3,7 @@
 #include "print.h"
 #include "thread.h"
 #include "interrupt.h"
-#define SLEEP_DUR 150000000
+#define SLEEP_DUR 300000000
 
 static uint32_t stack1[1024];
 static uint32_t stack2[1024];
@@ -18,36 +18,36 @@ static void sleep_tick(uint32_t duration){
 static void thread1(){
 
     int count = 5;
-    print("Running thread <1>: ");
-       while(count-- > 0){
+    print("<Start 1>");
+       while(--count >= 0){
          _disable_interrupt();
         print("<1>");
         sleep_tick(SLEEP_DUR);
        _enable_interrupt();
     }
-    print("Done<1> ");
+    print("<End 1>");
 }
 static void thread2(){
     int count = 8;
-    print("Running thread <2>: ");
-      while(count-- > 0){
+    print("<Start 2>");
+      while(--count >= 0){
          _disable_interrupt(); 
         print("<2>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Done<2> ");
+    print("<End 2>");
 }
 static void thread3(){
     int count = 11;  
-    print("Running thread <3>: ");
-    while(count-- > 0){
+    print("<Start 3>");
+    while(--count >= 0){
         _disable_interrupt();
         print("<3>");
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    print("Done<3> ");
+    print("<End 3>");
 }
 
 void init_threads(void){
@@ -102,6 +102,10 @@ void init( multiboot* pmb ) {
 
   init_pic();
   init_pit();
+
+  println("Begin Scheduling ...");
+  println("");
+  sleep_tick(SLEEP_DUR);
 
   schedule();
   _enable_interrupt();

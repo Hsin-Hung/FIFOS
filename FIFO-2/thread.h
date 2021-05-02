@@ -56,8 +56,9 @@ void error(char *s){
 // add a thread back to the run queue 
 void runqueue_add(TCB_t *tcb){
 
-    // don't add the thread to the run queue if it's not allocated 
+    // no unallocated TCB should be added to the run queue 
     if(!tcb->allocated){
+      error("schedule an unallocated TCB");
       return;
     }
 
@@ -84,12 +85,8 @@ void schedule(void){
     // if there is no more threads in the run queue
     if(!tcb){
 
-      //this is simply for finish running the current thread 
-      for(uint32_t i=0; i<NUM_THREADS; i++){
-        if (fifos_threads[i].allocated){
-          return;
-        }
-      }
+      //we still have to finish executing the current thread 
+     if(cur_thread)return;
 
       print("No more threads!");
       __asm__ volatile("jmp finish");
@@ -103,21 +100,21 @@ void schedule(void){
         runqueue_add(fromThread);// add the preempted thread to the run queue
         __asm__ volatile("call context_switch"::"S"(fromThread), "D"(cur_thread)); //S:esi, D:edi 
     }else{
-        __asm__ volatile("call context_switch"::"S"(0), "D"(cur_thread));// for the first thread thread 
+        __asm__ volatile("call context_switch"::"S"(0), "D"(cur_thread));// for the first thread 
     }
 
 
 }
 
-// exit thread logic when a thread finishes executing 
+// exit thread logic when current thread finishes executing 
 void exit_thread(void){
   if(cur_thread == NULL){
     error("Exit without current thread!");
     return;
   }
-  //runqueue_remove(cur_thread);
   cur_thread->allocated = 0;
   cur_thread->tid = -1;
+  cur_thread = NULL;
   schedule(); 
 }
 

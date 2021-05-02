@@ -1,8 +1,10 @@
 #ifndef PRINT_H_
 #define PRINT_H_
 #include "types.h"
-
 /* Hardware text mode color constants. */
+
+void clear();
+
 enum vga_color
 {
   COLOR_BLACK = 0,
@@ -80,6 +82,7 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y)
  
 void terminal_putchar(char c)
 {
+  if(terminal_row == 0 && terminal_column == 0)clear();
   terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
   if ( ++terminal_column == VGA_WIDTH )
     {
@@ -91,9 +94,20 @@ void terminal_putchar(char c)
     }
 }
 
+void clear(){
+
+  for(uint32_t i=0; i<VGA_HEIGHT; i++){
+    for(uint32_t j=0; j<VGA_WIDTH; j++){
+      terminal_putentryat(' ', terminal_color, j, i);
+    }
+    
+  }
+
+}
+
 // print the given string
 void print(const char* data)
-{
+{ 
   size_t datalen = strlen(data);
   for ( size_t i = 0; i < datalen; i++ )
     terminal_putchar(data[i]);
@@ -107,7 +121,10 @@ void println(const char* data){
     terminal_putchar(data[i]);
 
     terminal_column = 0;
-    ++terminal_row;
+    if ( ++terminal_row == VGA_HEIGHT )
+	{
+	  terminal_row = 0;
+	}
 }
  
 
