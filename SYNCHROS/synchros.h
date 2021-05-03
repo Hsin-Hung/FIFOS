@@ -4,6 +4,7 @@
 
 #define S 16 
 #define NUM_MSG 100 /* make sure this is even number for equal prod-con distribution, or else it gets stuck in infinite loop */
+#define MSG_LEN 20
 
 void printConsumerMsg(uint32_t pid, uint32_t cid, uint32_t mnum, char * msg);
 void createMsg(uint32_t msg_num, uint32_t toThreadID, char buf[]);
@@ -14,7 +15,7 @@ typedef struct BUFFER {
     uint32_t producer_thread_id;
     uint32_t consumer_thread_id;
     uint32_t message_num;
-    char message[20];
+    char message[MSG_LEN];
 
 } BUFFER_t;
 
@@ -123,7 +124,7 @@ void printConsumerMsg(uint32_t cid, uint32_t pid, uint32_t mnum, char * msg){
 /* create the producer msg */
 void createMsg(uint32_t msg_num, uint32_t toThreadID, char buf[]){
 
-    static char msg[20];
+    static char msg[MSG_LEN];
     char msg_num_str[2], toTID_str[2];
     itoa(msg_num_str, 'd', msg_num);
     itoa(toTID_str, 'd', toThreadID);
