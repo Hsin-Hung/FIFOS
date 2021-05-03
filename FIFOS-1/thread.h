@@ -18,6 +18,8 @@ TCB_t fifos_threads[NUM_THREADS]; // the pool of threads
 TCB_t *runqueue = NULL; // linked list as the run queue for the allocated threads, eg. T1 -> T2 -> T3 
 TCB_t *cur_thread = NULL; // the current running thread 
 
+
+
 // initialize the pool of TCBs 
 void init_tcb(void){
 

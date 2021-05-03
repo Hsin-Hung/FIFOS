@@ -1,3 +1,6 @@
+#ifndef _THREAD_H_
+#define _THREAD_H_
+
 #include "types.h"
 #include "synchros.h"
 #define NUM_THREADS 4 
@@ -204,3 +207,4 @@ int thread_create(void *stack, void *func, uint32_t isProducer){
     return 0;
 
 }
+#endif
