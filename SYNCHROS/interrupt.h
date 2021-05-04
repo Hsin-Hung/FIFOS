@@ -27,7 +27,6 @@
 #define PIC2_BASE_IRQ 0x28
 
 #define PIT_FREQ 1193182
-#define RELOAD_VAL 100  
 
 #define _disable_interrupt() __asm__ volatile ("cli\n\t")
 #define _enable_interrupt() __asm__ volatile ("sti\n\t")
@@ -92,7 +91,7 @@ void init_pic(void){
 
 /* PIT initialization to send timer interrupt once every 10ms, source: https://wiki.osdev.org/Programmable_Interval_Timer
 , http://www.jamesmolloy.co.uk/tutorial_html/5.-IRQs%20and%20the%20PIT.html */
-void init_pit(void){
+void init_pit(uint32_t reload_val){
 
     /* 0x34(00110100) --> Mode/Command register 0x43
         00: channel 0
@@ -104,7 +103,7 @@ void init_pit(void){
 
     // high:low
     /* we send to PIT is the value to divide PIT_FREQ: 1193180 Hz by, RELOAD_VAL: 100 for 10 ms IRQ interval */
-    uint16_t divisor = PIT_FREQ/RELOAD_VAL; 
+    uint16_t divisor = PIT_FREQ/reload_val; 
     uint8_t upper = (uint8_t) ((divisor & 0xff00) >> 8), low = (uint8_t) (divisor & 0xff);
     outb(0x40, low);
     outb(0x40, upper);

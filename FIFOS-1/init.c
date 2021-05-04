@@ -101,7 +101,7 @@ void init( multiboot* pmb ) {
   init_threads();
 
   init_pic();
-  init_pit();
+  init_pit(100);
 
   println("Begin Scheduling ...");
   println("");
