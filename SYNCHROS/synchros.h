@@ -2,7 +2,7 @@
 #define _SYNCHRO_H_
 #include "types.h"
 
-#define S 16 
+#define S 10
 #define NUM_MSG 100 /* make sure this is even number for equal prod-con distribution, or else it gets stuck in infinite loop */
 #define MSG_LEN 20
 
