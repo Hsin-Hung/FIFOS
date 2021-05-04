@@ -84,6 +84,7 @@ static TCB_t* pick_next_thread(void){
   }
 
 
+  /* optimize by not scheduling prod/con when buffers full/empty */
   while(--i >= 0){
     tcb = runqueue;
     if (tcb){

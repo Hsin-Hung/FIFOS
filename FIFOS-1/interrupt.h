@@ -84,12 +84,14 @@ void init_pic(void){
 	outb(PIC1_DATA, ICW4_8086);
 	outb(PIC2_DATA, ICW4_8086);
  
+    /* here you can also just set them to 0, unmasks */
 	outb(PIC1_DATA, a1);   // restore saved masks.
 	outb(PIC2_DATA, a2);
 
 }
 
-/* PIT initialization to send timer interrupt once every 10ms, source: https://wiki.osdev.org/Programmable_Interval_Timer*/
+/* PIT initialization to send timer interrupt once every 10ms, source: https://wiki.osdev.org/Programmable_Interval_Timer
+, http://www.jamesmolloy.co.uk/tutorial_html/5.-IRQs%20and%20the%20PIT.html */
 void init_pit(void){
 
     /* 0x34(00110100) --> Mode/Command register 0x43
@@ -101,8 +103,9 @@ void init_pit(void){
     outb(0x43, 0x34);
 
     // high:low
-    uint16_t frequency = PIT_FREQ/RELOAD_VAL; 
-    uint8_t upper = (uint8_t) ((frequency & 0xff00) >> 8), low = (uint8_t) (frequency & 0xff);
+    /* we send to PIT is the value to divide PIT_FREQ: 1193180 Hz by, RELOAD_VAL: 100 for 10 ms IRQ interval */
+    uint16_t divisor = PIT_FREQ/RELOAD_VAL; 
+    uint8_t upper = (uint8_t) ((divisor & 0xff00) >> 8), low = (uint8_t) (divisor & 0xff);
     outb(0x40, low);
     outb(0x40, upper);
 

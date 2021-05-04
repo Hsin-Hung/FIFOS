@@ -47,7 +47,7 @@ int in(uint32_t prod_tid, uint32_t con_tid, uint32_t msg_num){
 
     /* if the buffer is full, then nothing else to do */
     if(counter == S){
-        println("<Buffer Full>");
+        //println("<Buffer Full>");
         return 0;
     }
 
@@ -58,7 +58,7 @@ int in(uint32_t prod_tid, uint32_t con_tid, uint32_t msg_num){
         circular_buf[in_i].consumer_thread_id = con_tid;
         circular_buf[in_i].message_num = msg_num;
         createMsg(msg_num, con_tid, circular_buf[in_i].message);
-        println(circular_buf[in_i].message);
+        //println(circular_buf[in_i].message);
         in_i = (in_i + 1)%S;
         ++counter;
         return 1;
@@ -75,7 +75,7 @@ int out(uint32_t tid){
 
     /* if the buffer is empty, then nothing else to do */
     if(counter == 0){
-        println("<Buffer Empty>");
+        //println("<Buffer Empty>");
         return 0;
     }
 
@@ -95,7 +95,7 @@ int out(uint32_t tid){
 
     }
 
-    println("<Wrong TID>");
+    //println("<Wrong TID>");
     return 0;
 
 }
@@ -109,12 +109,15 @@ void printConsumerMsg(uint32_t cid, uint32_t pid, uint32_t mnum, char * msg){
     itoa(pidstr, 'd', pid);
     itoa(mnumstr, 'd', mnum);
 
+    print("consumer thread ID: ");
     print(cidstr);
-    print(":");
+    print(",");
+    print("producer thread ID: ");
     print(pidstr);
-    print(":");
+    print(",");
+    print("message #: ");
     print(mnumstr);
-    print(":");
+    print(",");
     println(msg);
 
 

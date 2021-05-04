@@ -4,7 +4,8 @@
 #include "thread.h"
 #include "interrupt.h"
 #include "synchros.h"
-#define SLEEP_DUR 150000000
+
+#define SLEEP_DUR 100000000
 
 static uint32_t stack1[1024];
 static uint32_t stack2[1024];
@@ -23,7 +24,7 @@ static void thread1(){
 
        while(msg_num < NUM_MSG){
            _disable_interrupt();
-           print("<Producer 1>");
+           //print("<Producer 1>");
            if(msg_num % 2 == 0){
                success = in(1, 3, msg_num);
            }else{
@@ -34,13 +35,13 @@ static void thread1(){
             sleep_tick(SLEEP_DUR);
            _enable_interrupt();
     }
-    println("<Done 1>");
+    //println("<Done 1>");
 }
 static void thread2(){
     int msg_num = 0, success = 0;
       while(msg_num < NUM_MSG){
             _disable_interrupt();
-            print("<Producer 2>");
+            //print("<Producer 2>");
            if(msg_num % 2 == 0){
                success = in(2, 3, msg_num);
            }else{
@@ -51,30 +52,30 @@ static void thread2(){
            sleep_tick(SLEEP_DUR);
            _enable_interrupt();
     }
-    println("<Done 2>");
+    //println("<Done 2>");
 }
 static void thread3(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-        print("<Consumer 3>");
+        //print("<Consumer 3>");
         if(out(3))--msg_num;
          sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    println("<Done 3>");
+    //println("<Done 3>");
 }
 
 static void thread4(){
     int msg_num = NUM_MSG;  
     while(msg_num > 0){
         _disable_interrupt();
-         print("<Consumer 4>");
+         //print("<Consumer 4>");
         if(out(4))--msg_num;
         sleep_tick(SLEEP_DUR);
         _enable_interrupt();
     }
-    println("<Done 4>");
+    //println("<Done 4>");
 }
 
 void init_threads(void){

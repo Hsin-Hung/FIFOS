@@ -8,7 +8,7 @@
 #define BUFFER_EMPTY 0
 
 typedef struct lock {
-    int * flag;
+    int flag;
 } lock_t;
 
 typedef struct {
@@ -25,14 +25,38 @@ void condition_signal(condition_t *cond);
 condition_t buffer_full_cond;
 condition_t buffer_empty_cond;
 
+TCB_t * wait_queue = NULL;
+
 void enqueue(TCB_t * queue, TCB_t * thread){
 
+    cur_thread = NULL;
+    thread->next = NULL;
 
+    if(!wait_queue){
+        wait_queue = thread;
+        return;
+    }
+    
+    TCB_t *cur = queue;
+    while(cur->next){
+        cur = cur->next;
+    }
+    cur->next = thread;
 
 
 }
 
 TCB_t * dequeue(TCB_t * queue){
+
+    if(!queue) return queue;
+
+    TCB_t * tcb;
+    tcb = wait_queue;
+    if (tcb){
+        wait_queue = tcb->next;
+    }
+
+    return tcb;
 
 }
 
@@ -55,14 +79,22 @@ int test_and_set(int* lockPtr) {
 
 void mutex_lock (lock_t *lock){
 
-    while(test_and_set(lock->flag) == 1);
+    _disable_interrupt();
 
+    while(lock->flag){
+        enqueue(wait_queue, cur_thread);
+        thread_yield();
+    }
+    lock->flag = 1;
+
+    _enable_interrupt();
 }
 
 void mutex_unlock (lock_t *lock){
-
+    _disable_interrupt();
     lock->flag = 0;
-
+    runqueue_add(dequeue(wait_queue));
+    _enable_interrupt();    
 }
 
 void condition_wait(condition_t *cond, lock_t *lock){
