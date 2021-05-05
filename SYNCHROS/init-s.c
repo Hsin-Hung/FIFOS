@@ -1,11 +1,11 @@
 #include "multiboot.h"
 #include "types.h"
-#include "print.h"
-#include "thread.h"
+#include "print-s.h"
+#include "thread-s.h"
 #include "interrupt.h"
 #include "synchros.h"
 
-#define SLEEP_DUR 200000000
+#define SLEEP_DUR 150000000
 
 static uint32_t stack1[1024];
 static uint32_t stack2[1024];
