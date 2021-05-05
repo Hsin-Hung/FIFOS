@@ -1,7 +1,7 @@
 #include "multiboot.h"
 #include "types.h"
-#include "print.h"
-#include "thread.h"
+#include "print-f.h"
+#include "thread-f.h"
 #include "interrupt.h"
 #define SLEEP_DUR 300000000
 

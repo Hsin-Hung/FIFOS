@@ -2,7 +2,7 @@
 #define _INTERRUPT_H_
 
 #include "types.h"
-#include "print.h"
+#include "print-f.h"
 
 /* definitions source: https://wiki.osdev.org/8259_PIC */
 #define ICW1_ICW4	0x01		/* ICW4 (not) needed */

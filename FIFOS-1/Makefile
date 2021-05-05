@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -m32 -fno-builtin -fno-stack-protector -fno-strict-aliasing -fno-delete-null-pointer-checks -nostdinc -I. -g -Wall -std=c99
 CPPFLAGS = -Wa,--32 -MMD
-OBJS = boot.o init.o switch.o idt.o 
+OBJS = boot-f.o init-f.o switch.o idt.o 
 PROGS = fifos-1
 MNT_POINT=/mnt/
 
