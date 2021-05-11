@@ -2,7 +2,7 @@
 #include "types.h"
 #include "print-f.h"
 #include "thread-f.h"
-#include "interrupt.h"
+#include "interrupt-f.h"
 #define SLEEP_DUR 300000000
 
 static uint32_t stack1[1024];

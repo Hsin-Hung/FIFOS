@@ -2,7 +2,7 @@
 #include "types.h"
 #include "print-s.h"
 #include "thread-s.h"
-#include "interrupt.h"
+#include "interrupt-s.h"
 #include "synchros.h"
 
 #define SLEEP_DUR 150000000

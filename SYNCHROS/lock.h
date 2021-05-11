@@ -1,8 +1,8 @@
 #ifndef _LOCK_H_
 #define _LOCK_H_
 #include "types.h"
-#include "interrupt.h"
-#include "thread.h"
+#include "interrupt-s.h"
+#include "thread-s.h"
 #define LOCKED 1
 #define BUFFER_FULL 1
 #define BUFFER_EMPTY 0
