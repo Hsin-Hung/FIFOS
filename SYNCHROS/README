@@ -1,4 +1,4 @@
-Synchros - Hsin-Hung Wu U29935516
+# Synchros
 
 1. Call 'make' to assemble and link the relevant files together to produce "synchros," an ELF 32-bit LSB executable for our new system. 
 
